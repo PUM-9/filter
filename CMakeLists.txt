@@ -11,4 +11,4 @@ add_definitions(${PCL_DEFINITIONS})
 set(SOURCE_FILES src/main.cpp src/Filter.cpp src/include/Filter.h)
 add_executable(filter ${SOURCE_FILES})
 
-target_link_libraries(filter ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES})
+target_link_libraries(filter ${PCL_LIBRARIES})
