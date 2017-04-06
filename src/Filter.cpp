@@ -8,10 +8,14 @@
 #include <pcl/features/normal_3d.h>
 #include <pcl/kdtree/kdtree.h>
 #include <pcl/segmentation/extract_clusters.h>
-#include <pcl/io/pcd_io.h>
-#include <pcl/visualization/pcl_visualizer.h>
 
-void Filter::filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, int rotation, int curve) const {
+/**
+ * Performs a clustering filter on the input cloud and centers the filtered cloud around
+ * the origin
+ * @param cloud_in The input cloud to be filtered
+ * @param cloud_out The output filtered cloud
+ */
+void Filter::filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const {
     // Use a pass through filter to remove all points outside of specific coordinates
     pcl::PassThrough<pcl::PointXYZ> pt_filter;
     pt_filter.setInputCloud(cloud_in);
@@ -55,15 +59,15 @@ void Filter::filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, in
     scale_transform.scale(Eigen::Vector3f(1, 1, scaling_factor));
     pcl::transformPointCloud(*cloud_out, *cloud_out, scale_transform);
 
-    // Rotate the object around the x axis to match the objects real world rotation
-    Eigen::Matrix3f rotation_matrix(Eigen::AngleAxisf((rotation*M_PI) / 180, Eigen::Vector3f::UnitX()));
-    Eigen::Affine3f rotation_transform(Eigen::Affine3f::Identity());
-    rotation_transform.rotate(rotation_matrix);
-    pcl::transformPointCloud(*cloud_out, *cloud_out, rotation_transform);
-
     return;
 }
 
+/**
+ * Moves the input cloud to the origin by looking at the stick.
+ * Also moves the cloud down so that the lowest point is at height 0.
+ * @param cloud_in The input point cloud.
+ * @param cloud_out The resulting transformed point cloud.
+ */
 void Filter::move_to_origin(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const {
     // Translate the object to move the center of the object to the origin (approximately)
     Eigen::Affine3f translation_transform(Eigen::Affine3f::Identity());
@@ -88,6 +92,15 @@ void Filter::move_to_origin(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud
     pcl::transformPointCloud(*cloud_out, *cloud_out, translation_transform);
 }
 
+/**
+ * Finds and removes the stick holding the object in the scanner by dividing the
+ * input cloud into clusters and removing all clusters below a certain threshold.
+ * Can also return just the stick by passing inverse = true.
+ * @param cloud_in The input point cloud to be filtered.
+ * @param cloud_out The resulting point cloud without the stick.
+ * @param inverse Filter out the object and return the stick instead.
+ * @return true if successful
+ */
 bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, bool inverse) const {
     // Create the KdTree object for the search method of the extraction
     pcl::search::KdTree<pcl::PointXYZ>::Ptr search_tree(new pcl::search::KdTree<pcl::PointXYZ>);
@@ -119,6 +132,7 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
             cluster->points.push_back(cloud_in->points[*pit]);
         }
 
+        // Set data for the point cloud
         cluster->width = cluster->points.size();
         cluster->height = 1;
         cluster->is_dense = true;
@@ -129,11 +143,10 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
     if (!clusters.empty()) {
         std::vector<PointCloud::Ptr> good_clusters;
 
+        // Go through all clusters and find the ones we are looking for
         for (size_t i = 0; i < clusters.size(); ++i) {
             Eigen::Vector4f centroid(Eigen::Vector4f::Zero());
             pcl::compute3DCentroid(*clusters.at(i), centroid);
-
-            std::cout << "Centroid: " << std::endl << centroid << std::endl << std::endl;
 
             if (!inverse && centroid(0, 0) < cluster_x_max) {
                 good_clusters.push_back(clusters[i]);
@@ -142,9 +155,7 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
             }
         }
 
-        std::cout << "Total clusters: " << clusters.size() << std::endl;
-        std::cout << "Good clusters: " << good_clusters.size() << std::endl;
-
+        // Add the good clusters to cloud_out
         for (size_t i = 0; i < good_clusters.size(); ++i) {
             if (i == 0) {
                 *cloud_out = *good_clusters.at(i);
@@ -155,6 +166,7 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
 
         return true;
     } else {
+        // We could not find any clusters, return the input cloud
         *cloud_out = *cloud_in;
         return false;
     }

@@ -29,10 +29,10 @@ int main(int argc, char** argv) {
                     return -1;
                 }
 
-                filter.filter(cloud_in, cloud_out, 0, 0);
+                filter.filter(cloud_in, cloud_out);
 
                 std::string filename = p.stem().string() + "_filtered.pcd";
-                std::cout << "Saving to " << filename << std::endl;
+                std::cout << "Saving filtered cloud to " << filename << std::endl;
                 pcl::io::savePCDFile(filename, *cloud_out);
 
             } else if (fs::is_directory(p)) {
@@ -45,14 +45,13 @@ int main(int argc, char** argv) {
                             return -1;
                         }
 
-                        filter.filter(cloud_in, cloud_out, 0, 0);
+                        filter.filter(cloud_in, cloud_out);
 
                         std::string filename = p.string() + "_filtered/" + it->path().filename().string();
                         fs::create_directory(fs::path(filename).parent_path());
 
-                        std::cout << "Saving to " << filename << std::endl;
+                        std::cout << "Saving filtered cloud to " << filename << std::endl;
                         pcl::io::savePCDFile(filename, *cloud_out);
-
                     }
                 }
             }

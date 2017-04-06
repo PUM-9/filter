@@ -12,11 +12,7 @@ class Filter {
         float scaling_factor = 0.5f;
         int cluster_x_max = 10;
 
-        // Move the object to the origin by finding the stick and centering it
         void move_to_origin(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const;
-
-        // Remove the stick holding the object from the point cloud.
-        // Can also remove everything but the stick by passing inverse = true
         bool remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, bool inverse = false) const;
 
     public:
@@ -25,8 +21,7 @@ class Filter {
         int y_min = 250, y_max = 580;
         int z_min = -1, z_max = 1;
 
-        // Perform the filtering
-        void filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, int rotation, int curve) const;
+        void filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const;
 
         // Functions for setting the scaling factor (for different cart speeds)
         float get_scaling_factor() const { return scaling_factor; }
