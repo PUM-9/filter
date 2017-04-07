@@ -1,24 +1,66 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
+#include <boost/program_options.hpp>
 #include <pcl/io/pcd_io.h>
-#include <pcl/visualization/pcl_visualizer.h>
-#include <pcl/common/centroid.h>
 
 #include "include/Filter.h"
 
 namespace fs = boost::filesystem;
+namespace po = boost::program_options;
 
 int main(int argc, char** argv) {
-    if (argc == 1) {
-        std::cout << "Usage: filter sources" << std::endl;
-        std::cout << "Where sources is a list of files or directories." << std::endl;
-        return 0;
+    // Declare the supported options
+    po::options_description cli_options("Allowed options");
+    cli_options.add_options()
+            ("help,h", "produce help message")
+            ("cutoff_height,c", po::value<int>(), "the cutoff height in mm for the filter\n"
+                    "use lower values for objects that are higher up\n"
+                    "default=10")
+            ("scale,s", po::value<float>(), "the scaling factor used to adjust for different cart speeds\n"
+                    "the default works for cart speed=200\n"
+                    "default=0.5");
+
+    po::options_description hidden("Hidden options");
+    hidden.add_options()
+            ("sources", po::value<std::vector<std::string> >(), "input files");
+
+    po::options_description all("All options");
+    all.add(cli_options).add(hidden);
+
+    po::positional_options_description positional;
+    positional.add("sources", -1);
+
+    // Parse the cli arguments
+    po::variables_map vm;
+    po::store(po::command_line_parser(argc, (const char *const *)argv).options(all).positional(positional).allow_unregistered().run(), vm);
+    po::notify(vm);
+
+    // Print help text
+    if (vm.count("help") || !vm.count("sources")) {
+        std::cout << "Usage: filter [options] sources" << std::endl << std::endl;
+        std::cout << "sources is a list of files and directories with .pcd files to filter" << std::endl << std::endl;
+        std::cout << cli_options << std::endl;
+        return 1;
     }
 
     Filter filter;
 
-    for (int i = 1; i < argc; ++i) {
-        fs::path p(argv[i]);
+    // Set the cutoff height of the filter to input
+    if (vm.count("cutoff_height")) {
+        filter.set_cluster_cutoff(vm["cutoff_height"].as<int>());
+    }
+
+    // Set the scaling factor of the filter
+    if (vm.count("scale")) {
+        filter.set_scaling_factor(vm["scale"].as<float>());
+    }
+
+    // Get a vector of all the input sources
+    auto sources = vm["sources"].as<std::vector<std::string> >();
+
+    // and go through them all
+    for (int i = 0; i < sources.size(); ++i) {
+        fs::path p(sources[i]);
 
         if (fs::exists(p)) {
             if (fs::is_regular_file(p)) {
