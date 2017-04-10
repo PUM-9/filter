@@ -148,9 +148,9 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
             Eigen::Vector4f centroid(Eigen::Vector4f::Zero());
             pcl::compute3DCentroid(*clusters.at(i), centroid);
 
-            if (!inverse && centroid(0, 0) < cluster_x_max) {
+            if (!inverse && centroid(0, 0) < cluster_cutoff) {
                 good_clusters.push_back(clusters[i]);
-            } else if (inverse && centroid(0, 0) >= cluster_x_max) {
+            } else if (inverse && centroid(0, 0) >= cluster_cutoff) {
                 good_clusters.push_back(clusters[i]);
             }
         }

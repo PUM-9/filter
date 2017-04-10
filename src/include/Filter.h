@@ -10,7 +10,7 @@ class Filter {
     private:
         // The scaling factor 0.5 assumes the scans are run with cart speed 200 mm/s.
         float scaling_factor = 0.5f;
-        int cluster_x_max = 10;
+        int cluster_cutoff = 10;
 
         void move_to_origin(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const;
         bool remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out, bool inverse = false) const;
@@ -26,6 +26,11 @@ class Filter {
         // Functions for setting the scaling factor (for different cart speeds)
         float get_scaling_factor() const { return scaling_factor; }
         void set_scaling_factor(float scaling_factor) { Filter::scaling_factor = scaling_factor; }
+
+        // Functions for setting the clusters height limit in mm
+        // A lower value means the object is placed higher up
+        int get_cluster_cutoff() const { return cluster_cutoff; }
+        void set_cluster_cutoff(int cluster_x_max) { Filter::cluster_cutoff = cluster_x_max; }
 };
 
 
