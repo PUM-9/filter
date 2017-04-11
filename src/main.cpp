@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     }
 
     // Get a vector of all the input sources
-    auto sources = vm["sources"].as<std::vector<std::string> >();
+    std::vector<std::string> sources = vm["sources"].as<std::vector<std::string> >();
 
     // and go through them all
     for (int i = 0; i < sources.size(); ++i) {
@@ -89,7 +89,8 @@ int main(int argc, char** argv) {
 
                         filter.filter(cloud_in, cloud_out);
 
-                        std::string filename = p.string() + "_filtered/" + it->path().filename().string();
+                        std::string filename = p.remove_trailing_separator().string() + "_filtered/"
+                                               + it->path().filename().string();
                         fs::create_directory(fs::path(filename).parent_path());
 
                         std::cout << "Saving filtered cloud to " << filename << std::endl;

@@ -124,11 +124,11 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
 
     // Generate all the individual cluster point clouds
     std::vector<PointCloud::Ptr> clusters;
-    for (std::vector<pcl::PointIndices>::const_iterator it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
+    for (auto it = cluster_indices.begin(); it != cluster_indices.end(); ++it) {
         PointCloud::Ptr cluster(new PointCloud);
 
         // For every list of indices, add all the points to a point cloud
-        for (std::vector<int>::const_iterator pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
+        for (auto pit = it->indices.begin(); pit != it->indices.end(); ++pit) {
             cluster->points.push_back(cloud_in->points[*pit]);
         }
 
@@ -158,9 +158,9 @@ bool Filter::remove_stick(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_o
         // Add the good clusters to cloud_out
         for (size_t i = 0; i < good_clusters.size(); ++i) {
             if (i == 0) {
-                *cloud_out = *good_clusters.at(i);
+                *cloud_out = *good_clusters[i];
             } else {
-                *cloud_out += *good_clusters.at(i);
+                *cloud_out += *good_clusters[i];
             }
         }
 
