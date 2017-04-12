@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
         fs::path p(sources[i]);
 
         if (fs::exists(p)) {
-            if (fs::is_regular_file(p)) {
+            if (fs::is_regular_file(p) && p.extension().string() == ".pcd") {
                 PointCloud::Ptr cloud_in(new PointCloud), cloud_out(new PointCloud);
 
                 if (pcl::io::loadPCDFile(p.string(), *cloud_in) == -1) {
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 
             } else if (fs::is_directory(p)) {
                 for (auto it = fs::directory_iterator(p); it != fs::directory_iterator(); ++it) {
-                    if (fs::is_regular_file(it->path())) {
+                  if (fs::is_regular_file(it->path()) && it->path().extension() == ".pcd") {
                         PointCloud::Ptr cloud_in(new PointCloud), cloud_out(new PointCloud);
 
                         if (pcl::io::loadPCDFile(it->path().string(), *cloud_in) == -1) {
