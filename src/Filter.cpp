@@ -62,6 +62,14 @@ void Filter::filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) co
     return;
 }
 
+void Filter::rotate(PointCloud::Ptr cloud, int rotation, int curve) const {
+    // Rotate the object around the x axis to match the objects real world rotation
+    Eigen::Matrix3f rotation_matrix(Eigen::AngleAxisf((rotation*M_PI) / 180, Eigen::Vector3f::UnitX()));
+    Eigen::Affine3f rotation_transform(Eigen::Affine3f::Identity());
+    rotation_transform.rotate(rotation_matrix);
+    pcl::transformPointCloud(*cloud, *cloud, rotation_transform);
+}
+
 /**
  * Moves the input cloud to the origin by looking at the stick.
  * Also moves the cloud down so that the lowest point is at height 0.

@@ -13,6 +13,8 @@ int main(int argc, char** argv) {
     po::options_description cli_options("Allowed options");
     cli_options.add_options()
             ("help,h", "produce help message")
+            ("rotation,r", po::value<int>(), "rotate the point cloud to a rotation")
+            ("curve", po::value<int>(), "rotate the point to a curve")
             ("cutoff_height,c", po::value<int>(), "the cutoff height in mm for the filter\n"
                     "use lower values for objects that are higher up\n"
                     "default=10")
