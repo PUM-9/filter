@@ -14,8 +14,8 @@ int main(int argc, char** argv) {
     cli_options.add_options()
             ("help,h", "produce help message")
             ("rotation,r", po::value<int>(), "rotate the point cloud to a rotation")
-            ("curve", po::value<int>(), "rotate the point to a curve")
-            ("cutoff_height,c", po::value<int>(), "the cutoff height in mm for the filter\n"
+            ("curve,c", po::value<int>(), "rotate the point cloud to a curve")
+            ("cutoff_height", po::value<int>(), "the cutoff height in mm for the filter\n"
                     "use lower values for objects that are higher up\n"
                     "default=10")
             ("scale,s", po::value<float>(), "the scaling factor used to adjust for different cart speeds\n"
@@ -56,6 +56,16 @@ int main(int argc, char** argv) {
     if (vm.count("scale")) {
         filter.set_scaling_factor(vm["scale"].as<float>());
     }
+    
+    int rotation = 0;
+    if (vm.count("rotation")) {
+        rotation = vm["rotation"].as<int>();
+    }
+
+    int curve = 0;
+    if (vm.count("curve")) {
+        curve = vm["curve"].as<int>();
+    }
 
     // Get a vector of all the input sources
     std::vector<std::string> sources = vm["sources"].as<std::vector<std::string> >();
@@ -75,6 +85,8 @@ int main(int argc, char** argv) {
 
                 filter.filter(cloud_in, cloud_out);
 
+		filter.rotate(cloud_out, rotation, curve);
+
                 std::string filename = p.stem().string() + "_filtered.pcd";
                 std::cout << "Saving filtered cloud to " << filename << std::endl;
                 pcl::io::savePCDFile(filename, *cloud_out);
@@ -90,6 +102,8 @@ int main(int argc, char** argv) {
                         }
 
                         filter.filter(cloud_in, cloud_out);
+
+			filter.rotate(cloud_out, rotation, curve);
 
                         std::string filename = p.remove_trailing_separator().string() + "_filtered/"
                                                + it->path().filename().string();
