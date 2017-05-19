@@ -39,10 +39,10 @@ echo "Downloading cmake version 3.8.1"
 echo "Generating makefiles"
 {
     cmake-3.8.1-Linux-x86_64/bin/cmake ..
-}
+} > /dev/null 2>&1
 
 echo "Building 3DCopy"
-make -j4# > /dev/null 2>&1
+make -j4 > /dev/null 2>&1
 sudo make install
 
 echo "Done"
