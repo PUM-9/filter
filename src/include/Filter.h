@@ -23,6 +23,8 @@ class Filter {
 
         void filter(PointCloud::ConstPtr cloud_in, PointCloud::Ptr cloud_out) const;
 
+        void rotate(PointCloud::Ptr cloud, int rotation = 0, int curve = 0) const;
+
         // Functions for setting the scaling factor (for different cart speeds)
         float get_scaling_factor() const { return scaling_factor; }
         void set_scaling_factor(float scaling_factor) { Filter::scaling_factor = scaling_factor; }
