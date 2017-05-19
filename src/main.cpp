@@ -105,8 +105,13 @@ int main(int argc, char** argv) {
 
 			filter.rotate(cloud_out, rotation, curve);
 
-                        std::string filename = p.remove_trailing_separator().string() + "_filtered/"
-                                               + it->path().filename().string();
+			std::string path = p.string();
+			if (path[path.size()-1] == '/') {
+			    path.pop_back();
+			}
+
+			std::string filename = path + "_filtered/"
+			                       + it->path().filename().string();
                         fs::create_directory(fs::path(filename).parent_path());
 
                         std::cout << "Saving filtered cloud to " << filename << std::endl;
